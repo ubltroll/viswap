@@ -5,6 +5,8 @@ import "./libraries/ERC20.sol";
 import './interfaces/IViswapFactory.sol';
 import './interfaces/IViswapPair.sol';
 import './libraries/UQ112x112.sol';
+import './libraries/Math.sol';
+import './libraries/FullMath.sol';
 import './interfaces/IERC20.sol';
 import './libraries/Math.sol';
 import './libraries/SafeMath.sol';
@@ -198,5 +200,10 @@ contract ViswapPair is ERC20("ViSwap-LP", "VSP-LP") {
     // force reserves to match balances
     function sync() external lock {
         _update(IERC20(token0).balanceOf(address(this)), IERC20(token1).balanceOf(address(this)), reserve0, reserve1);
+    }
+    
+    function currentSqrtPriceX96() external view returns (uint160) {
+        uint256 liquidity = Math.sqrt(uint256(reserve1).mul(reserve0));
+        return uint160(FullMath.mulDiv(liquidity, 1<<96, reserve0));
     }
 }

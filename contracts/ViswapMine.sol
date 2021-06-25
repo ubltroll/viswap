@@ -10,7 +10,7 @@ import './libraries/TransferHelper.sol';
 import './ViswapToken.sol';
 
 
-//Famring pool of LimitSwap Token
+//Famring pool of viSwap Token
 //Copied and modified from sushi MasterChef
 //https://github.com/sushiswap/sushiswap/blob/master/contracts/MasterChef.sol
 //no migrate
@@ -39,8 +39,8 @@ contract ViswapMine is Ownable {
         uint256 lastRewardBlock; // Last block number that tokens distribution occurs.
         uint256 accMinedPerShare; // Accumulated tokens per share, times 1e12. See below.
     }
-    // The LimitSwap TOKEN!
-    ViswapToken public immutable limitswapToken;
+    // The viSwap TOKEN!
+    ViswapToken public immutable viswapToken;
     // Viswap Token mined per block.
     uint256 public minedPerBlock;
     // Mining will stop when reached max amount
@@ -63,12 +63,12 @@ contract ViswapMine is Ownable {
     );
 
     constructor(
-        ViswapToken _limitswapToken,
+        ViswapToken _viswapToken,
         uint256 _minedPerBlock,
         uint256 _startBlock,
         uint256 _maxSupply
     ) {
-        limitswapToken = _limitswapToken;
+        viswapToken = _viswapToken;
         minedPerBlock = _minedPerBlock;
         startBlock = _startBlock;
         maxSupply = _maxSupply;
@@ -123,7 +123,7 @@ contract ViswapMine is Ownable {
     }
 
 
-    // View function to see pending LimitSwap Tokens on frontend.
+    // View function to see pending viSwap Tokens on frontend.
     function pendingAmount(uint256 _pid, address _user)
         public
         view
@@ -145,7 +145,7 @@ contract ViswapMine is Ownable {
         }
         _pending = user.amount.mul(accMinedPerShare).div(1e12).sub(user.rewardDebt);
         if (maxSupply > 0){
-            if(limitswapToken.totalSupply().add(_pending) > maxSupply) _pending = limitswapToken.totalSupply().sub(maxSupply);
+            if(viswapToken.totalSupply().add(_pending) > maxSupply) _pending = viswapToken.totalSupply().sub(maxSupply);
         }
     }
 
@@ -184,10 +184,10 @@ contract ViswapMine is Ownable {
                 .mul(pool.allocPoint)
                 .div(totalAllocPoint);
         if(maxSupply > 0) {
-            if(minedAmount > maxSupply.sub(limitswapToken.totalSupply())) minedAmount = maxSupply.sub(limitswapToken.totalSupply());
+            if(minedAmount > maxSupply.sub(viswapToken.totalSupply())) minedAmount = maxSupply.sub(viswapToken.totalSupply());
         }
         if(minedAmount > 0){
-            limitswapToken.mint(address(this), minedAmount);
+            viswapToken.mint(address(this), minedAmount);
             pool.accMinedPerShare = pool.accMinedPerShare.add(
                 minedAmount.mul(1e12).div(totalDeposit)
             );
@@ -215,14 +215,14 @@ contract ViswapMine is Ownable {
         amount = userInfo[_pid][_user].amount;
     }
 
-    // Claim limitswap token.
+    // Claim viswap token.
     function claim(uint256 _pid) public {
         UserInfo storage user = userInfo[_pid][msg.sender];
         _claim(_pid, msg.sender);
         user.rewardDebt = user.amount.mul(poolInfo[_pid].accMinedPerShare).div(1e12);
     }
 
-    // Deposit tokens to mine limitswap token.
+    // Deposit tokens to mine viswap token.
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
@@ -268,12 +268,12 @@ contract ViswapMine is Ownable {
         user.rewardDebt = 0;
     }
 
-    // Safe limitswap token transfer function, just in case if rounding error causes pool to not have enough tokens.
+    // Safe viswap token transfer function, just in case if rounding error causes pool to not have enough tokens.
     function safeTokenTransfer(address _to, uint256 _amount) internal {
         TransferHelper.safeTransfer(
-            address(limitswapToken),
+            address(viswapToken),
             _to,
-            Math.min(_amount, limitswapToken.balanceOf(address(this)))
+            Math.min(_amount, viswapToken.balanceOf(address(this)))
             );
     }
 }
